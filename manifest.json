@@ -1,0 +1,20 @@
+{
+  "manifest_version": 2,
+
+  "name": "Searcher",
+  "description": "Smart Searching",
+  "version": "0.1",
+  "browser_action": {
+    "default_icon": {
+        "19":"media/search-70.png",
+        "38":"media/search-70.png"
+        },
+    "default_popup": "popup.html"
+    },
+  "content_scripts": [
+    {
+    "matches": ["http://*/*"],
+    "js": ["media/zepto.js","main.js"]
+    }
+  ]
+}
