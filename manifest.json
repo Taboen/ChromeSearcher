@@ -9,12 +9,12 @@
         "19":"media/search-70.png",
         "38":"media/search-70.png"
         },
-    "default_popup": "popup.html"
+    "default_popup": "search_box.html"
     },
   "content_scripts": [
     {
     "matches": ["http://*/*"],
-    "js": ["media/zepto.js","main.js"]
+    "js": ["lib/zepto.js","content_script.js"]
     }
   ]
 }
