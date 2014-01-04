@@ -6,9 +6,6 @@
  * 3. Receives search results (as JSON object, sent via chrome message)
  * 4. Opens new tab where results are going to be displayed.
  * 
- * DOES NOT handle neither the display of search results nor searching
- * browsed pages. 
- * 
  */
 
 // document here refers to extension popup - search_box.html
@@ -22,7 +19,7 @@ $(document).ready(function () {
             chrome.tabs.sendMessage(tabs[0].id, {'query':query, "To":"content_script"}, function (response)  {
                 console.log(response);
                 // Store search results in local storage.
-                localStorage.setItem("searchResults",response.results);
+                localStorage.setItem("searchResults",response.result);
                 displayInTab(response);
             });
         });

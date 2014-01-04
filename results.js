@@ -8,6 +8,21 @@
 
 $(document).ready(function () {
     console.log("document ready");
-    var message = localStorage.getItem("searchResults"); 
-    $('.row').append("<h1>received:"+message+"</h1>");
+    var view = new resultsView();
+    view.show();
 })
+
+var resultsView = function (args) {
+    this.template = $('.searchResultsTemplate').html();
+};
+
+resultsView.prototype = {
+    show: function () {
+       // console.log(Mustache.render(this.template,this.message()));
+        $('.row').append(Mustache.render(this.template,this.message()));
+    },
+    message: function () {
+        return JSON.parse(localStorage.getItem('searchResults'));
+    }
+}
+

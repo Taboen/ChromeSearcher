@@ -2,16 +2,32 @@
 <html>
   <head>
   <title> Search Results </title>
- </head>
+  <link rel="stylesheet" href="lib/bootstrap.min.css">
+  <link rel="stylesheet" href="css/customize_bootstrap.css">
+  </head>
   <body>
-  <h2>Results</h2>
     <div class='container'>
         <div class="row">
+            <script type='text/template' class='searchResultsTemplate'>
+            
+            <div class="page-header">
+                <h2> Searching for '{{ query }}' <br>  <small> in {{ url }} </small> </h2>
+            </div>
+            
+            <div class='results'>
+                {{#results}}
+                <div> {{{.}}} </div>
+                <br>
+                {{/results}}
+            </div>
+            
+            </script>
         </div>
     </div>
     <div class="footer">
     </div>
-    <script src="lib/zepto.js"></script> 
+    <script src="lib/zepto.js"></script>
+    <script src="lib/mustache.js"></script>
     <script src="results.js"></script>
     </body>
 </html>
