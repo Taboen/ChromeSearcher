@@ -12,50 +12,95 @@
  *** don't have access to the same localStorage as search_box.js and results.js.
  */
 
- $(document).ready(function () {   
+function PageParser (queryObject) {
+    // Accepts a query object, with options.
+    this.query = queryObject["query"];
+    this.sentences = queryObject["sentences"];
+    this.ignoreCase = queryObject["ignoreCase"]; 
+};
+
+PageParser.prototype = {
+    parse: function () {
+        var whereSearch,result,parsedResult;
+        this.sentences ? whereSearch = this.getSentences() : whereSearch = this.getParagraphs();
+        result = this.findMatches(whereSearch);
+        result = this.highlightQuery(result)
+        parsedResult = this.addSearchDetails(result);
+        console.log(parsedResult);
+        return parsedResult;
+    }, 
+    getParagraphs: function () {
+        // returns an array of text contents of paragraphs in parsed page
+        var paragraphs = document.getElementsByTagName('p');
+        return Array.prototype.map.call(paragraphs, function (node) { return node.textContent;})
+    }, 
+    getSentences: function () {
+        // returns all sentences on a page,
+        // assumes that a sentence is a string separated by dot.
+        return $('body').text().split(".");
+    }, 
+    findMatches: function (whereSearch) {
+        // whereSearch, an array of strings
+        // returns an array where query string appears
+        whereSearchCopy = whereSearch.slice();
+        if (this.ignoreCase) {
+            this.query = this.query.toLowerCase();
+            return whereSearch
+                .map(function (textPiece,ind) {
+                    return [textPiece.toLowerCase(),ind];
+                })
+                .filter(function(textPieceAndInd) { 
+                    return textPieceAndInd[0].indexOf(this.query) != -1
+                },this)
+                .map(function(foundPiece) {
+                    return whereSearch[foundPiece[1]]
+                })
+                //console.log(whereSearchCopy);
+        } else {
+            return whereSearchCopy.filter(function (textPiece) {
+                return textPiece.indexOf(this.query) != -1; 
+            },this);
+        }
+    },
+    highlightQuery: function (result) {
+        return result.map(function (textPiece) {
+            var query = new RegExp(this.query,"gi");
+            textPiece = textPiece.replace(query,"<strong class='found'>"+this.query+"</strong>");
+            if (!this.sentences) {
+                return textPiece.replace(/\n/g," ").trim();;
+            } else {
+                return textPiece.replace(/\n/g," ").trim() + ".";
+            }
+        },this); 
+    }, 
+    addSearchDetails: function (result) {
+        // Accepts an array of strings.
+        // Returns a JSON object with following keys:
+        //    url, a string
+        //    timestamp, Date object
+        //    result, an array of strings
+        //    ignoreCase, Boolean
+        //    sentences, Boolean
+        //    query, string
+        var url = location.href;
+        var timestamp = new Date();
+        var parsedResult = {"query":this.query, "timestamp":timestamp, "url":url,
+            "result":result, "sentences":this.sentences, "resultsLength":result.length, "ignoreCase":this.ignoreCase};
+        return JSON.stringify(parsedResult);
+    } 
+}
+
+$(document).ready(function () {   
     console.log("content script loaded!");
+    //parser = new PageParser({"query":"Think", "sentences":false,"ignoreCase":true});
+    //parser.parse();
     chrome.runtime.onMessage.addListener(
         function (message,sender,sendResponse) {
             console.log(message,sender);
-            var result = parsePage(message.query);
+            parser = new PageParser(message);
+            result = parser.parse();
             if (message.To == "content_script") {
-                sendResponse({"result":result});
+                sendResponse(result);
             }
     });
 });
-
-function parsePage (query) {
- /* Searches for a match to query and stores the results.
-  * 
-  * Takes a string as input.
-  * 
-  * Returns a JSON object with the following keys:
-  *   
-  *      "query": original query
-  *      "timestamp": when search was performed
-  *      "url": url of page being searched
-  *      "results": array of strings
-  */
-    query = prepareQuery(query); 
-    var sentences = $('body').text().split(".").filter(function (sentence) {
-        return sentence.indexOf(query) != -1;
-    }).map(function (sentence) { 
-        sentence = sentence.replace(query,"<strong>"+query+"</strong>");
-        return sentence.replace(/\n/g," ").trim() + "." }); 
-    var url = location.href;
-    var timestamp = +new Date();
-    var result = {"query":query, "timestamp":timestamp, "url":url,
-        "results":sentences};
-    console.log(result, "result prepared");
-    return JSON.stringify(result);
-}
-
-function prepareQuery (query) {
-    // Accepts an object with following keys:
-    //      text, string, string searched for
-    //      ignoreCase, Boolean
-    //      separator, string, either 'p' for paragraph or . for sentence
-    // TODO
-    
-    return query;
-}

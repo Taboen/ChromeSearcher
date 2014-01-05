@@ -11,20 +11,23 @@
             <script type='text/template' class='searchResultsTemplate'>
             
             <div class="page-header">
-                <h2> Searching for '{{ query }}' <br>  <small> in {{ url }} </small> </h2>
+                <h2> Searching for '{{ query }}' <br>  <small> 
+                in <a href={{url}}>{{url}}</a> </small> </h2>
+                <h4> Found {{ result.length }} results </h4>
             </div>
-            
+             
             <div class='results'>
-                {{#results}}
-                <div> {{{.}}} </div>
-                <br>
-                {{/results}}
+                {{#result}}
+                <div class='result-item'> {{{.}}} </div>
+                {{/result}}
             </div>
             
             </script>
         </div>
     </div>
-    <div class="footer">
+    <div id="footer">
+        <div class="container">
+        </div>
     </div>
     <script src="lib/zepto.js"></script>
     <script src="lib/mustache.js"></script>

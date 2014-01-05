@@ -1,3 +1,16 @@
 body {
 
 }
+
+.result-item {
+    padding:10px;
+    margin-bottom:4px;
+}
+
+.found {
+    background: yellow;
+}
+
+#footer {
+    height:40px;
+}
