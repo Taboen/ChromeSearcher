@@ -14,3 +14,11 @@ body {
 #footer {
     height:40px;
 }
+
+.search_box {
+    padding:5px;
+    margin:5px;
+}
+
+.optional {
+}

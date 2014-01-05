@@ -13,7 +13,10 @@
  */
 
 function PageParser (queryObject) {
-    // Accepts a query object, with options.
+    // Accepts a query object, with following keys:
+    //      query, string
+    //      sentences, Boolean
+    //      ignoreCase, Boolean
     this.query = queryObject["query"];
     this.sentences = queryObject["sentences"];
     this.ignoreCase = queryObject["ignoreCase"]; 
@@ -99,8 +102,6 @@ $(document).ready(function () {
             console.log(message,sender);
             parser = new PageParser(message);
             result = parser.parse();
-            if (message.To == "content_script") {
-                sendResponse(result);
-            }
+            sendResponse(result);
     });
 });

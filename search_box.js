@@ -13,19 +13,26 @@ function Controller () {
 
 Controller.prototype = {
     listen: function () {
-       $('.search_box').submit(function (e) {
-           var query = $('.query');
+        self = this; 
+        $('.search_box').submit(function (e) {
+           var query = $('input[name=query]').val();
+           if (query.trim().length < 3) return false;
+           var ignoreCase = $('input[name=ignoreCase]').attr('checked');
+           var sentences = $('input[name=sentences]:checked').val();
+           if (sentences == "true") {
+               sentences = true;
+           } else {
+               sentences = false;
+           }
+           self.run(message); 
            e.preventDefault();
        });
     }, 
-    run: function () {
-        listenToMessage
-        var message = formMessage();
-        if (!validate(message)) return false; 
+    run: function (message) {
         var response = notifyContentScript(message);
         storeLocal(response);
         openResultsPage();
-    }
+    },
     notifyContentScript: function (message) {
         // Sends message to content script
         chrome.tabs.query({active:true, currentWindow:true}, function (tabs) {
@@ -58,8 +65,9 @@ Controller.prototype = {
 
 // document here refers to extension popup - search_box.html
 $(document).ready(function () {
-      var controller = new Controller();
-      controller.run();
+    console.log("ready!");
+    var controller = new Controller();
+      controller.listen();
 });
 
 
