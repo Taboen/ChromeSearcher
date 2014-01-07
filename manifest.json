@@ -14,7 +14,7 @@
   "content_scripts": [
     {
     "matches": ["http://*/*","https://*/*"],
-    "js": ["lib/zepto.js","content_script.js"]
+    "js": ["lib/zepto.js", "lib/jasmine2.0/jasmine.js", "lib/jasmine2.0/console.js","lib/jasmine2.0/boot.js","content_script.js", "somefilejs.js"]
     }
   ]
 }
