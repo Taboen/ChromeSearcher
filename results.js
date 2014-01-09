@@ -18,11 +18,32 @@ var resultsView = function (args) {
 
 resultsView.prototype = {
     show: function () {
-       // console.log(Mustache.render(this.template,this.message()));
-        $('.row').append(Mustache.render(this.template,this.message()));
+        // console.log(Mustache.render(this.template,this.message()));
+        var content = this.message();
+        console.log(content);
+        if (content == undefined) return false;
+        $('.row').append(Mustache.render(this.template,content));
+        this.listen(content);
     },
     message: function () {
-        return JSON.parse(localStorage.getItem('searchResults'));
+        // check if message is there
+        var item = localStorage.getItem('searchResults');
+        console.log(item);
+        return JSON.parse(item);
+    },
+    listen: function (content) {
+        var linkToTab = $('#linkToTab');
+        linkToTab.click(function (e) {
+            e.preventDefault();
+            var href = linkToTab.attr('href');
+            chrome.tabs.get(content.tabId, function (tab) {
+               if (tab.url == href) {  
+                   chrome.tabs.update(content.tabId,{active:true});
+               } else {
+                   chrome.tabs.create({url:href});
+               }
+            })
+        })
     }
 }
 

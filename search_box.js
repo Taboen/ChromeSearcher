@@ -13,31 +13,39 @@ function Controller () {
 
 Controller.prototype = {
     listen: function () {
-        self = this; 
+        self = this;
         $('.search_box').submit(function (e) {
-           var query = $('input[name=query]').val();
-           if (query.trim().length < 3) return false;
-           var ignoreCase = $('input[name=ignoreCase]').attr('checked');
-           var sentences = $('input[name=sentences]:checked').val();
-           if (sentences == "true") {
-               sentences = true;
-           } else {
-               sentences = false;
-           }
-           self.run(message); 
            e.preventDefault();
+           var query, ignoreCase, sentences, startSearch, message;
+           
+           query = $('input[name=query]').val();
+           if (query.trim().length < 3) return false;
+           
+           ignoreCase = $('input[name="ignoreCase"]').attr('checked');
+           
+           $('#sentencesYes').attr('checked') ? sentences = true : sentences = false;
+           
+           startSearch = +new Date(); 
+           message = {query:query,sentences:sentences,ignoreCase:ignoreCase, startSearch:startSearch}; 
+           self.run(message)
+            console.log("from",window.location.href, message);
        });
     }, 
     run: function (message) {
-        var response = notifyContentScript(message);
-        storeLocal(response);
-        openResultsPage();
+        var response = this.notifyContentScript(message);
     },
     notifyContentScript: function (message) {
         // Sends message to content script
+        var extension = this; 
         chrome.tabs.query({active:true, currentWindow:true}, function (tabs) {
+            message.tabId = tabs[0].id;
             chrome.tabs.sendMessage(tabs[0].id, message, function (response)  {
-                console.log(response);
+                if (response != undefined) {
+                    extension.storeLocal(response);
+                    extension.openResultsPage();
+                } else {
+                    console.warn("response", response);
+                }
             });
         });
     },
@@ -46,19 +54,12 @@ Controller.prototype = {
         var url = chrome.extension.getURL('results.html');
         chrome.tabs.create({"url":url}, function (tab) {});
     },
-    formMessage: function () {
-        // Creates message from input submitted via form.
-        // Returns js object with keys:
-        //          "query": string
-        //          "To": string
-        //          "sentences":Boolean
-        //          "ignoreCase": Boolean
-        var message; 
-    },
     validate: function (message) {
     }, 
-    storeLocal: function () {
+    storeLocal: function (response) {
         // stores item in local storage
+        console.log(response);
+        //response = JSON.stringify(response);
         localStorage.setItem("searchResults",response);
     },
 }
@@ -67,7 +68,5 @@ Controller.prototype = {
 $(document).ready(function () {
     console.log("ready!");
     var controller = new Controller();
-      controller.listen();
+    controller.listen();
 });
-
-
