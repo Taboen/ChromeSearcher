@@ -9,13 +9,13 @@
         "19":"media/search-70.png",
         "38":"media/search-70.png"
         },
-    "default_popup": "search_box.html"
+    "default_popup": "src/search_box.html"
     },
   "permissions": ["tabs"], 
   "content_scripts": [
     {
     "matches": ["http://*/*","https://*/*"],
-    "js": ["lib/zepto.js", "content_script.js"]
+    "js": ["lib/zepto.js", "src/content_script.js"]
     }
   ]
 }

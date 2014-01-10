@@ -48,7 +48,7 @@ PageParser.prototype = {
     parse: function () {
         // returns parsedResult, a JSON object.
         var whereSearch,result,parsedResult;
-        this.sentences ? whereSearch = this.getSentences(this.getParagraphs().join(" ")) : whereSearch = this.getParagraphs();
+        this.sentences ? whereSearch = this.getSentences(this.getRawText()) : whereSearch = this.getParagraphs();
         // TODO refactor into chaining? 
         result = this.findMatches(whereSearch);
         result = this.highlightQuery(result);
@@ -167,8 +167,9 @@ PageParser.prototype = {
 
 function runTests() { 
     logger("running tests");
-    var parser = new PageParser({query:"Tartar",sentences:false, ignoreCase:false});
-    parser.parse();
+    var parser = new PageParser({query:"both",sentences:false, ignoreCase:false});
+    result = parser.parse();
+    logger(result);
 }
  
 /*

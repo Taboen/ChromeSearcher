@@ -51,7 +51,7 @@ Controller.prototype = {
     },
     openResultsPage: function () {
         // Opens a new in-browser page where search results will be displayed.
-        var url = chrome.extension.getURL('results.html');
+        var url = chrome.extension.getURL('src/results.html');
         chrome.tabs.create({"url":url}, function (tab) {});
     },
     validate: function (message) {
