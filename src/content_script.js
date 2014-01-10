@@ -13,7 +13,7 @@
  */
 
 DEVELOPER_MODE = true;
-TESTING = false; 
+TESTING = true; 
 
 var logger  = function () {
     // Small logging function 
@@ -26,7 +26,11 @@ var logger  = function () {
     mess += "  ";
     if (DEVELOPER_MODE) {
         for (var arg in arguments) {
-            mess += " " + arguments[arg];   
+            if (typeof arg == "object") {
+                console.log(arg, "sss");
+            } else {
+                mess += " " + arguments[arg];   
+            }
         }
     console.log(mess);
     }
@@ -64,7 +68,7 @@ PageParser.prototype = {
         var paragraphs = document.getElementsByTagName('p');
         return this.getNodesTextContent(paragraphs); 
     }, 
-    getSentences: function (textPiece) {
+    /* getSentences: function (textPiece) {
         // Accepts a string, 
         // returns all sentences in that string.
         // Assumes that a sentence is a string separated by ".", "?" or "!"
@@ -81,6 +85,12 @@ PageParser.prototype = {
                 if (separators[index] != undefined) return item.trim() + separators[index];
                 return item.trim();
             });
+        return sentences;
+    },*/
+    getSentences: function (textChunk) {
+        console.log(textChunk);
+        var regex = new RegExp("([A-Z].+?[.?!])","g");
+        var sentences = textChunk.match(regex);
         return sentences;
     },
     getHeadings: function () {
@@ -165,13 +175,44 @@ PageParser.prototype = {
     } 
 };
 
-function runTests() { 
+function runTests(optionalInput) { 
+     
     logger("running tests");
     var parser = new PageParser({query:"both",sentences:false, ignoreCase:false});
-    result = parser.parse();
-    logger(result);
+    if (optionalInput == undefined) {
+        optionalInput = parser.getParagraphs();
+    }
+    result = parser.getSentences(optionalInput);
+    console.log(result)
 }
- 
+
+/*
+ * We want to run some tests from command line without
+ * browser and its document (e.g. parsing sentences 
+ * with regexes), so we need 
+ * some hack to accomplish this. 
+ */
+try {
+    weAreInBrowser(); 
+} catch (e) {
+    // ensure we're not hiding some 
+    // import errors
+    if (e instanceof ReferenceError && e.message == 'document is not defined') {
+        noBrowserAround();
+        return false
+    } else {
+        throw e
+    }
+}
+
+function noBrowserAround() {
+    // Node is around so let's deal with it, parse those sentences
+    // supplied via command line!
+    process.stdin.setEncoding('utf-8');
+    process.stdin.on('data', function (chunk) {
+        runTests(chunk);
+    });
+ }
 /*
  *
  * Initialize content script, tie 
@@ -180,15 +221,17 @@ function runTests() {
  *
  */
 
-$(document).ready(function () {   
-    logger("content script loaded!");
-    if (TESTING && DEVELOPER_MODE) runTests();
-    chrome.runtime.onMessage.addListener(
-        function (message,sender,sendResponse) {
-            console.log("got message",message,"from sender",sender);
-            logger(message,sender);
-            var parser = new PageParser(message);
-            var result = parser.parse();
-            sendResponse(result);
+function weAreInBrowser () {
+    $(document).ready(function () {   
+        logger("content script loaded!");
+        if (TESTING && DEVELOPER_MODE) runTests();
+        chrome.runtime.onMessage.addListener(
+            function (message,sender,sendResponse) {
+                console.log("got message",message,"from sender",sender);
+                logger(message,sender);
+                var parser = new PageParser(message);
+                var result = parser.parse();
+                sendResponse(result);
+        });
     });
-});
+}
