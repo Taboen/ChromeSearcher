@@ -27,7 +27,7 @@ var logger  = function () {
     if (DEVELOPER_MODE) {
         for (var arg in arguments) {
             if (typeof arg == "object") {
-                console.log(arg, "sss");
+                console.log.call(console,arg);
             } else {
                 mess += " " + arguments[arg];   
             }
@@ -53,7 +53,6 @@ PageParser.prototype = {
         // returns parsedResult, a JSON object.
         var whereSearch,result,parsedResult;
         this.sentences ? whereSearch = this.getSentences(this.getRawText()) : whereSearch = this.getParagraphs();
-        // TODO refactor into chaining? 
         result = this.findMatches(whereSearch);
         result = this.highlightQuery(result);
         parsedResult = this.addSearchDetails(result);
@@ -68,27 +67,7 @@ PageParser.prototype = {
         var paragraphs = document.getElementsByTagName('p');
         return this.getNodesTextContent(paragraphs); 
     }, 
-    /* getSentences: function (textPiece) {
-        // Accepts a string, 
-        // returns all sentences in that string.
-        // Assumes that a sentence is a string separated by ".", "?" or "!"
-        // TODO hone our regex, it needs to parse cases like:
-        //     "1.2" --> do not split version number
-        //     "string.replace" --> do not split methods
-        //     "(something something.)ola" --> should split on brackets not on dot
-        var separators = [];
-        var sentences = textPiece.replace(/\?|\!|\./g, function (item) { 
-                separators.push(item); return ".";
-            })
-            .split(".")
-            .map(function (item,index) {
-                if (separators[index] != undefined) return item.trim() + separators[index];
-                return item.trim();
-            });
-        return sentences;
-    },*/
     getSentences: function (textChunk) {
-        console.log(textChunk);
         var regex = new RegExp("([A-Z].+?[.?!])","g");
         var sentences = textChunk.match(regex);
         return sentences;
@@ -118,34 +97,18 @@ PageParser.prototype = {
     findMatches: function (whereSearch) {
         // whereSearch, an array of strings
         // returns an array where query string appears
+        var regex,found;
+        
         if (this.ignoreCase) {
-            return this.findMatchesIgnoreCase(whereSearch); 
+            regex = new RegExp(this.query,"gi");
+        } else {
+            regex = new RegExp(this.query,"g");
         }
-        var found =  whereSearch.filter(function (textPiece) {
-                return textPiece.indexOf(this.query) != -1; 
-        },this);
-        //logger("I've found", found)
-        return found;
+        
+        return whereSearch.filter(function (textChunk) {
+            return regex.test(textChunk);
+        }); 
     },
-    findMatchesIgnoreCase: function (whereSearch) {
-        // We want to ignore case while searching, 
-        // but we want to display results the way they 
-        // appear on page. We don't want to display 
-        // all results lowercase. 
-        var whereSearchCopy = whereSearch.slice();
-        this.query = this.query.toLowerCase();
-        return whereSearch
-                .map(function (textPiece,ind) {
-                    return [textPiece.toLowerCase(),ind];
-                })
-                .filter(function(textPieceAndInd) { 
-                    return textPieceAndInd[0].indexOf(this.query) != -1;
-                },this)
-                .map(function(foundPiece) {
-                    return whereSearch[foundPiece[1]];
-                });
- 
-    }, 
     highlightQuery: function (result) {
         return result.map(function (textPiece) {
             var query = new RegExp(this.query,"gi");
@@ -176,14 +139,13 @@ PageParser.prototype = {
 };
 
 function runTests(optionalInput) { 
-     
     logger("running tests");
-    var parser = new PageParser({query:"both",sentences:false, ignoreCase:false});
+    var parser = new PageParser({query:"Farewell",sentences:true, ignoreCase:true});
     if (optionalInput == undefined) {
         optionalInput = parser.getParagraphs();
     }
-    result = parser.getSentences(optionalInput);
-    console.log(result)
+    result = parser.parse();
+    console.log(result);
 }
 
 /*
@@ -192,6 +154,7 @@ function runTests(optionalInput) {
  * with regexes), so we need 
  * some hack to accomplish this. 
  */
+
 try {
     weAreInBrowser(); 
 } catch (e) {
