@@ -20,15 +20,12 @@ Controller.prototype = {
            
            query = $('input[name=query]').val();
            if (query.trim().length < 3) return false;
-           
            ignoreCase = $('input[name="ignoreCase"]').attr('checked');
-           
            $('#sentencesYes').attr('checked') ? sentences = true : sentences = false;
-           
            startSearch = +new Date(); 
-           message = {query:query,sentences:sentences,ignoreCase:ignoreCase, startSearch:startSearch}; 
-           self.run(message)
-            console.log("from",window.location.href, message);
+           message = {query:query,sentences:sentences,ignoreCase:ignoreCase, startSearch:startSearch};
+           self.run(message);
+           console.log("from",window.location.href, message);
        });
     }, 
     run: function (message) {
@@ -59,7 +56,6 @@ Controller.prototype = {
     storeLocal: function (response) {
         // stores item in local storage
         console.log(response);
-        //response = JSON.stringify(response);
         localStorage.setItem("searchResults",response);
     },
 }

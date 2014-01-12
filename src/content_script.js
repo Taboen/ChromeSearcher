@@ -13,28 +13,7 @@
  */
 
 DEVELOPER_MODE = true;
-TESTING = true; 
-
-var logger  = function () {
-    // Small logging function 
-    // we don't want to pollute console
-    // with logs when content script 
-    // runs for users.
-    var when = new Date();
-    var mess = "";
-    mess += [when.getHours(),when.getMinutes(), when.getSeconds()].join(":");
-    mess += "  ";
-    if (DEVELOPER_MODE) {
-        for (var arg in arguments) {
-            if (typeof arg == "object") {
-                console.log.call(console,arg);
-            } else {
-                mess += " " + arguments[arg];   
-            }
-        }
-    console.log(mess);
-    }
-}; 
+TESTING = true;
 
 function PageParser (queryObject) {
     // Accepts a query object, with following keys:
@@ -52,19 +31,31 @@ PageParser.prototype = {
     parse: function () {
         // returns parsedResult, a JSON object.
         var whereSearch,result,parsedResult;
-        this.sentences ? whereSearch = this.getSentences(this.getRawText()) : whereSearch = this.getParagraphs();
+        this.sentences ? whereSearch = this.getSentences(this.getStructuredText()) : whereSearch = this.getParagraphs();
         result = this.findMatches(whereSearch);
         result = this.highlightQuery(result);
         parsedResult = this.addSearchDetails(result);
-        logger(parsedResult);
+        console.log(parsedResult);
         return parsedResult;
     }, 
     getRawText: function () {
         return document.body.textContent;
     },
+    getStructuredText: function () {
+        // Returns an array of strings
+        var textPieces = [];
+        var paragraphs = this.getParagraphs();
+        var headings = this.getHeadings();
+        var listItems = this.getListItems();
+        [paragraphs,headings,listItems].forEach(function (arr) {
+            textPieces = textPieces.concat(arr);
+        });
+        return textPieces.join(" ");
+    },
     getParagraphs: function () {
         // returns an array of text contents of paragraphs in parsed page
         var paragraphs = document.getElementsByTagName('p');
+        
         return this.getNodesTextContent(paragraphs); 
     }, 
     getSentences: function (textChunk) {
@@ -79,7 +70,6 @@ PageParser.prototype = {
             hnum = this.getNodesTextContent(hnum);
             headings = Array.prototype.concat.call(headings,hnum);
         },this);
-        console.log(headings);
         return headings;
     },
     getListItems: function () {
@@ -105,9 +95,16 @@ PageParser.prototype = {
             regex = new RegExp(this.query,"g");
         }
         
-        return whereSearch.filter(function (textChunk) {
-            return regex.test(textChunk);
-        }); 
+        var found = whereSearch.filter(function (textChunk) {
+           // var testResult = regex.test(textChunk);  
+            return textChunk.search(regex) != -1;
+        });
+
+        var found2 = [];
+        whereSearch.forEach(function (textPiece) {
+       //     console.log(textPiece.search(regex),textPiece);
+        });
+        return found;
     },
     highlightQuery: function (result) {
         return result.map(function (textPiece) {
@@ -139,43 +136,13 @@ PageParser.prototype = {
 };
 
 function runTests(optionalInput) { 
-    logger("running tests");
-    var parser = new PageParser({query:"Farewell",sentences:true, ignoreCase:true});
+    var parser = new PageParser({query:"document",sentences:true, ignoreCase:true});
     if (optionalInput == undefined) {
         optionalInput = parser.getParagraphs();
     }
     result = parser.parse();
-    console.log(result);
 }
 
-/*
- * We want to run some tests from command line without
- * browser and its document (e.g. parsing sentences 
- * with regexes), so we need 
- * some hack to accomplish this. 
- */
-
-try {
-    weAreInBrowser(); 
-} catch (e) {
-    // ensure we're not hiding some 
-    // import errors
-    if (e instanceof ReferenceError && e.message == 'document is not defined') {
-        noBrowserAround();
-        return false
-    } else {
-        throw e
-    }
-}
-
-function noBrowserAround() {
-    // Node is around so let's deal with it, parse those sentences
-    // supplied via command line!
-    process.stdin.setEncoding('utf-8');
-    process.stdin.on('data', function (chunk) {
-        runTests(chunk);
-    });
- }
 /*
  *
  * Initialize content script, tie 
@@ -184,17 +151,14 @@ function noBrowserAround() {
  *
  */
 
-function weAreInBrowser () {
-    $(document).ready(function () {   
-        logger("content script loaded!");
-        if (TESTING && DEVELOPER_MODE) runTests();
-        chrome.runtime.onMessage.addListener(
-            function (message,sender,sendResponse) {
-                console.log("got message",message,"from sender",sender);
-                logger(message,sender);
-                var parser = new PageParser(message);
-                var result = parser.parse();
-                sendResponse(result);
-        });
+$(document).ready(function () {   
+    console.log("content script loaded!");
+    if (TESTING && DEVELOPER_MODE) runTests();
+    chrome.runtime.onMessage.addListener(
+        function (message,sender,sendResponse) {
+            console.log("got message",message,"from sender",sender);
+            var parser = new PageParser(message);
+            var result = parser.parse();
+            sendResponse(result);
     });
-}
+});
