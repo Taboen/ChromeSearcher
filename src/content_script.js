@@ -20,6 +20,7 @@ function PageParser (queryObject) {
     //      query, string
     //      sentences, Boolean
     //      ignoreCase, Boolean
+    //      takes options from chrome.storage
     this.tabId = queryObject['tabId'];
     this.startSearch = queryObject["startSearch"];
     this.query = queryObject["query"];

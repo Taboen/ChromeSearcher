@@ -5,16 +5,18 @@
   <link rel="stylesheet" href="../lib/bootstrap.min.css">
   <link rel="stylesheet" href="css/customize_bootstrap.css">
   </head>
-  <body>
+  <body class="search_box_body">
     <div class='container'>
         <form action="" class="search_box">
-            <input type="text" name="query" class="query" placeholder="search">
+            <input type="text" name="query" class="form-control query" placeholder="search">
             <div class="optional">
                 <input type="radio" name="sentences" value="yes" id="sentencesYes" checked/>Sentences
                 <input type="radio" name="sentences" value="no" id="sentencesNo"/>Paragraphs 
+            <div>
+                <div id="ignoreCase">
                 <input type="checkbox" name="ignoreCase" checked>IgnoreCase
-            </div>
-        </form>
+                </div>
+           </form>
     </div>
     <div class="footer">
     </div>

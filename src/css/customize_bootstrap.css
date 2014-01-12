@@ -1,5 +1,8 @@
 body {
-    width:250x;
+}
+
+.search_box_body {
+    width:250px;
 }
 
 .result-item {
@@ -21,4 +24,23 @@ body {
 }
 
 .optional {
+    width:100%;
+    margin-top:3px;
+}
+
+#sentencesYes {
+    margin:5px;
+}
+
+#sentencesNo {
+    margin-left:5px;
+
+}
+
+.form-control {
+    width:100%;
+}
+
+#ignoreCase {
+    margin:5px;
 }
