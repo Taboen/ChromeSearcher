@@ -1,4 +1,4 @@
-/*
+/**
  * Main controller (runs after clicking extension icon)
  *
  * 1. Fetches input from search box with class ".search".
@@ -6,7 +6,7 @@
  * 3. Receives search results (as JSON object, sent via chrome message)
  * 4. Opens new tab where results are going to be displayed.
  * 
- */
+ **/
 
 function Controller () {
 }
