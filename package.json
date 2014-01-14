@@ -23,7 +23,9 @@
   "devDependencies": {
     "grunt": "~0.4.2",
     "grunt-contrib-uglify": "~0.2.2",
-    "grunt-contrib-jshint": "~0.8.0"
+    "grunt-contrib-jshint": "~0.8.0",
+    "grunt-uncss": "~0.1.6",
+    "grunt-processhtml": "~0.2.7"
   },
   "author": "pawelmhm",
   "license": "MIT",

@@ -1,3 +1,7 @@
 searcher.pem
 node_modules
 out/
+build
+src/util
+build.pem
+dist/build.crx
