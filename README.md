@@ -4,7 +4,7 @@ Google chrome extension which searches for all sentences or paragraphs matching 
 
 Installation
 ------------
-[Download here](https://github.com/pawelmhm/ChromeSearcher/blob/master/dist/build.crx), drag and drop to chrome extensions area.
+[Download here](https://github.com/pawelmhm/ChromeSearcher/raw/master/dist/build.crx), drag and drop to chrome extensions area.
 
 Created with
 ------------
